@@ -1,16 +1,89 @@
-# React + Vite
+# Priceline Flight Booking Redesign
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A clickable prototype that reimagines Priceline's round-trip flight booking flow, from search through checkout. Built with React and Priceline's open-source design system, using mock flight data.
 
-Currently, two official plugins are available:
+> **Student concept project.** This is not affiliated with or endorsed by Priceline. The Priceline name and styling, and the airline logos in `public/airlines`, belong to their respective owners and are used here for educational purposes only.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## The booking flow
 
-## React Compiler
+1. **Search** (`/`): enter airports, dates, and travelers. Once a search has been started, a "Pick up where you left off" card appears so you can resume at the furthest step reached.
+2. **Departure flights** (`/departure`): browse recommended and other flights with filters. Selecting a flight expands its fare options (Basic Economy through First) right inside the card.
+3. **Confirm details**: review the flight and fare in a popup before continuing.
+4. **Bundle choice**: choose between bundled round-trip deals and browsing return flights separately.
+5. **Return flights** (`/return`): a summary of the chosen departure sits above the list. On bundled flights you can keep your current cabin class in one click or see other fare options.
+6. **Checkout** (`/checkout`): expandable flight details (including each leg and layover), seat and baggage information, and a summary of charges.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Design decisions worth noting:
 
-## Expanding the Oxlint configuration
+- **Cabin class is picked after choosing a flight**, so the price shown is the price for the cabin actually selected.
+- **A step progress bar** (Departure, Fare Selection, Return, Fare Selection) and an **Edit Search** menu stay available throughout the flow.
+- **Consistent buttons**: every action button uses one shared style (white with a blue outline, filling blue on hover), defined in `src/components/Button.jsx`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Getting started
+
+Requires [Node.js](https://nodejs.org/) 20.19+ or 22.12+ (developed with Node 22.14).
+
+```bash
+npm install
+npm run dev
+```
+
+Then open http://localhost:5173.
+
+| Command           | What it does                              |
+| ----------------- | ----------------------------------------- |
+| `npm run dev`     | Start the development server with hot reload |
+| `npm run build`   | Build a production bundle into `dist/`   |
+| `npm run preview` | Serve the production build locally        |
+| `npm run lint`    | Check the code with Oxlint                |
+
+## Feature flags
+
+Alternate designs can be compared without code changes. Defaults live in `src/config/featureFlags.js`. To override a flag, add it to the URL; the choice is saved in the browser and carries through the whole flow. Use `=default` to clear it.
+
+| Flag              | Values                            | Default   | What it controls |
+| ----------------- | --------------------------------- | --------- | ---------------- |
+| `fareOptionsView` | `inline`, `rail`                  | `inline`  | Fare options expand inside the flight card (`inline`) or open in a panel along the right edge (`rail`). |
+| `uiScale`         | `compact`, `standard`             | `compact` | Flight cards, fare options, the Edit Search menu, the departure summary, and checkout content at 80% (`compact`) or full size (`standard`). Small text never drops below 12px on screen. |
+
+Examples:
+
+- http://localhost:5173/departure?fareOptionsView=rail
+- http://localhost:5173/departure?uiScale=standard
+- http://localhost:5173/departure?fareOptionsView=default&uiScale=default
+
+## Data and images
+
+- **Flights and fares** are mock data in `src/data/flights.js`: 10 departures and 8 returns between Chicago (ORD/MDW) and Sarasota (SRQ) across United, American, Delta, and Southwest, including 1-stop itineraries with layovers.
+- **Airline logos** are registered in `src/data/assets.js`. To add one, put an SVG or PNG in `public/airlines/` named by the airline's two-letter code (for example `B6.svg`) and add it to `airlineLogos`. Airlines without a logo show a colored tile with their code.
+- **Search page hero image**: set `heroImage` in `src/data/assets.js` to a file in `public/` (for example `'/images/search-hero.jpg'`). When it's `null`, a built-in illustration is shown.
+
+## Project structure
+
+```
+src/
+  pages/        One component per route: Search, Departure, Return, Checkout
+  components/   Flight and fare cards, dialogs, filters, navigation, shared Button
+  context/      BookingContext: search, selected flights and fares, UI state
+  config/       Feature flags and sizing helpers
+  data/         Mock flights, fares, and image asset registry
+  utils/        Formatting helpers for times and prices
+public/
+  airlines/     Airline logo files
+```
+
+## Tech stack
+
+- [React 18](https://react.dev/) with [React Router](https://reactrouter.com/)
+- [Vite](https://vite.dev/) for development and builds
+- [pcln-design-system](https://github.com/priceline/design-system) and pcln-icons, Priceline's open-source component and icon libraries
+- [styled-components](https://styled-components.com/) for component styling
+- [Oxlint](https://oxc.rs/) for linting
+
+## Known limitations
+
+- All flights, prices, and availability are mock data; nothing is booked or charged.
+- Filters and sorting show their options and counts but don't change the flight list yet.
+- Booking progress is kept in memory, so reloading the page starts the flow over. (Feature flag choices are saved.)
+- Only the flight search flow is interactive. Tabs such as Hotels and Cars, and links like "View all recent activity", show a short message instead.
+- Continue to Checkout on the final page marks the end of the prototype's scope.
