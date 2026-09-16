@@ -9,11 +9,15 @@ const SLANT = 24
 const STATUS_STYLES = {
   completed: { bg: '#99c3f9', color: '#fff' }, // primary.tint
   current: { bg: '#0068ef', color: '#fff' }, // primary.base
-  upcoming: { bg: '#fff', color: '#001833' }, // text.base
+  upcoming: { bg: '#fff', color: '#0b2a4a' }, // text.base
 }
-const BORDER = '#868d95' // border.tone
+const BORDER = '#0b2a4a' // border.tone
 
+// The border is drawn as an overlay rather than on the element itself: a real
+// border would clip the segment fills to the inside of the rounded edge, leaving
+// a hairline gap between the fill and the border.
 const Bar = styled.ol`
+  position: relative;
   display: flex;
   flex: 1;
   min-width: 0;
@@ -21,10 +25,18 @@ const Bar = styled.ol`
   margin: 0;
   padding: 0;
   list-style: none;
-  border: 1px solid ${BORDER};
   border-radius: 999px;
   background: #fff;
   overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid ${BORDER};
+    border-radius: 999px;
+    pointer-events: none;
+  }
 `
 
 // Middle segments center their label symmetrically; the end segments have one

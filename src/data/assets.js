@@ -1,14 +1,16 @@
-// Image assets. Put files in /public and reference them from the site root.
+// Image assets. Put files in /public and reference them through BASE_URL, which
+// is '/' locally and '/priceline-redesign/' on GitHub Pages.
+const base = import.meta.env.BASE_URL
 
 // Airline logos keyed by IATA code. Airlines without an entry fall back to a
 // colored tile showing the code.
 export const airlineLogos = {
-  UA: '/airlines/UA.svg',
-  AA: '/airlines/AA.svg',
-  WN: '/airlines/WN.svg',
-  DL: '/airlines/DL.svg',
+  UA: `${base}airlines/UA.svg`,
+  AA: `${base}airlines/AA.svg`,
+  WN: `${base}airlines/WN.svg`,
+  DL: `${base}airlines/DL.svg`,
 }
 
-// Search page hero photo, e.g. '/images/search-hero.jpg'.
+// Search page hero photo, e.g. `${base}images/search-hero.jpg`.
 // null shows the built-in illustration instead.
 export const heroImage = null

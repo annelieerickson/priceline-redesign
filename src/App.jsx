@@ -8,7 +8,8 @@ import CheckoutPage from './pages/CheckoutPage'
 function App() {
   return (
     <BookingProvider>
-      <BrowserRouter>
+      {/* BASE_URL keeps routes working under the GitHub Pages subpath */}
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<SearchPage />} />
           <Route path="/departure" element={<DepartureListPage />} />
