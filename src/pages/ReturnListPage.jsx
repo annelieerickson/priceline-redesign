@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Flex, Text, Link } from 'pcln-design-system'
+import styled from 'styled-components'
+import { Box, Flex, Text } from 'pcln-design-system'
+import Button from '../components/Button'
 import DepartureSummary from '../components/DepartureSummary'
 import TopNav from '../components/TopNav'
 import ProgressHeader from '../components/ProgressHeader'
@@ -17,6 +19,14 @@ import { useBooking } from '../context/BookingContext'
 
 const GROUPS = ['Recommended Flights to Chicago', 'Other Flights to Chicago']
 const showFareRail = featureFlags.fareOptionsView === 'rail'
+
+// Sized to sit beside the "Select Return Flight" heading
+const ViewToggleButton = styled(Button)`
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 15px;
+`
 
 export default function ReturnListPage() {
   const navigate = useNavigate()
@@ -133,11 +143,11 @@ export default function ReturnListPage() {
 
               <Flex justifyContent="space-between" alignItems="center" mb={1}>
                 <Text textStyle="heading3">Select Return Flight</Text>
-                <Link
+                <ViewToggleButton
                   onClick={() => setBundleMode(bundleMode === 'bundled' ? 'separate' : 'bundled')}
                 >
                   {bundleMode === 'bundled' ? 'View all flights' : 'View bundled deals'}
-                </Link>
+                </ViewToggleButton>
               </Flex>
               <Text textStyle="caption" color="text.light" mb={3}>
                 {bundleMode === 'bundled' ? 'Showing bundled deals' : 'Showing all flights'} to{' '}
