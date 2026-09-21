@@ -138,7 +138,7 @@ function makeFlight({ segments, ...details }) {
 // Mock round-trip bundle total for the default 3 travelers
 const bundleTotalFor3 = (perPersonPrice) => perPersonPrice * 3 - 1
 
-const RECOMMENDED_DEPARTURE = 'Recommended Flights to Sarasota'
+const RECOMMENDED_DEPARTURE = 'Bundled Flights to Sarasota'
 const OTHER_DEPARTURE = 'Other Flights to Sarasota'
 
 export const departureFlights = [
@@ -255,7 +255,7 @@ export const departureFlights = [
   }),
 ]
 
-const RECOMMENDED_RETURN = 'Recommended Flights to Chicago'
+const RECOMMENDED_RETURN = 'Bundled Flights to Chicago'
 const OTHER_RETURN = 'Other Flights to Chicago'
 // Bundle total when paired with the cheapest bundled departure
 const RETURN_BUNDLE_BASE = bundleTotalFor3(406)

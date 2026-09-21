@@ -13,13 +13,13 @@ import { departureFlights } from '../data/flights'
 import { featureFlags } from '../config/featureFlags'
 import { useBooking } from '../context/BookingContext'
 
-const GROUPS = ['Recommended Flights to Sarasota', 'Other Flights to Sarasota']
+const GROUPS = ['Bundled Flights to Sarasota', 'Other Flights to Sarasota']
 const cheapestPrice = Math.min(...departureFlights.map((f) => f.startingPrice))
 const showFareRail = featureFlags.fareOptionsView === 'rail'
 
 export default function DepartureListPage() {
   const navigate = useNavigate()
-  const { search, setDeparture, setBundleMode } = useBooking()
+  const { search, setDeparture } = useBooking()
 
   const [selectedFlight, setSelectedFlight] = useState(null)
   const [faresOpen, setFaresOpen] = useState(false)
@@ -48,11 +48,9 @@ export default function DepartureListPage() {
     setSelectedFare(null)
   }
 
-  // Returns open on bundled deals; the return page explains bundling in a tooltip
   const handleContinue = () => {
     setConfirmOpen(false)
     setDeparture({ flight: selectedFlight, fare: selectedFare })
-    setBundleMode('bundled')
     navigate('/return')
   }
 

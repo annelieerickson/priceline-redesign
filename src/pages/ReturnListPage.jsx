@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import styled from 'styled-components'
 import { Box, Flex, Text } from 'pcln-design-system'
-import Button from '../components/Button'
 import CollapsibleSection from '../components/CollapsibleSection'
 import DepartureSummary from '../components/DepartureSummary'
 import InfoTooltip from '../components/InfoTooltip'
@@ -19,23 +17,27 @@ import { returnFlights } from '../data/flights'
 import { featureFlags } from '../config/featureFlags'
 import { useBooking } from '../context/BookingContext'
 
-const GROUPS = ['Recommended Flights to Chicago', 'Other Flights to Chicago']
-// The recommended group holds the flights that can be bundled with the departure
+const GROUPS = ['Bundled Flights to Chicago', 'Other Flights to Chicago']
+// The first group holds the flights bundled with the departure
 const BUNDLED_GROUP = GROUPS[0]
 const showFareRail = featureFlags.fareOptionsView === 'rail'
 
-// Sized to sit beside the "Select Return Flight" heading
-const ViewToggleButton = styled(Button)`
-  flex-shrink: 0;
-  height: 36px;
-  padding: 0 16px;
-  font-size: 15px;
-`
+// Bundled flights are priced as an add-on to the departure and separate flights at
+// full price, so each section gets its own cheapest option
+const cheapestBundleDelta = Math.min(
+  ...returnFlights.filter((f) => f.bundledRoundTrip).map((f) => f.bundleDelta),
+)
+const cheapestSeparatePrice = Math.min(
+  ...returnFlights.filter((f) => !f.bundledRoundTrip).map((f) => f.separatePrice),
+)
+const isCheapest = (f) =>
+  f.bundledRoundTrip
+    ? f.bundleDelta === cheapestBundleDelta
+    : f.separatePrice === cheapestSeparatePrice
 
 export default function ReturnListPage() {
   const navigate = useNavigate()
-  const { search, departure, bundleMode, setBundleMode, setReturnSelection, resetTrip } =
-    useBooking()
+  const { search, departure, setReturnSelection, resetTrip } = useBooking()
 
   const [keepBarFlightId, setKeepBarFlightId] = useState(null)
   const [faresFlight, setFaresFlight] = useState(null)
@@ -48,20 +50,12 @@ export default function ReturnListPage() {
     return null
   }
 
-  const isBundleEligible = (flight) => flight.bundledRoundTrip && bundleMode === 'bundled'
-
-  // Bundled mode compares add-on deltas among bundle flights; otherwise full prices
-  const comparable =
-    bundleMode === 'bundled' ? returnFlights.filter((f) => f.bundledRoundTrip) : returnFlights
-  const comparePrice = (f) => (bundleMode === 'bundled' ? f.bundleDelta : f.separatePrice)
-  const cheapestPrice = Math.min(...comparable.map(comparePrice))
-  const isCheapest = (f) => comparable.includes(f) && comparePrice(f) === cheapestPrice
-
-  // Clicking a flight whose cabin bar or fares are already showing collapses them
+  // Clicking a flight whose cabin bar or fares are already showing collapses them.
+  // Bundled flights ask whether to keep the departure's cabin; others show all fares.
   const handleSelectFlight = (flight) => {
     const isOpen = keepBarFlightId === flight.id || faresFlight?.id === flight.id
-    setKeepBarFlightId(!isOpen && isBundleEligible(flight) ? flight.id : null)
-    setFaresFlight(!isOpen && !isBundleEligible(flight) ? flight : null)
+    setKeepBarFlightId(!isOpen && flight.bundledRoundTrip ? flight.id : null)
+    setFaresFlight(!isOpen && !flight.bundledRoundTrip ? flight : null)
   }
 
   const openConfirm = (flight, fare) => {
@@ -131,7 +125,7 @@ export default function ReturnListPage() {
 
   const renderFlightCards = (flights) =>
     flights.map((flight) => {
-      const bundled = isBundleEligible(flight)
+      const bundled = flight.bundledRoundTrip
       return (
         <FlightCard
           key={flight.id}
@@ -168,17 +162,12 @@ export default function ReturnListPage() {
                 onChangeFlight={handleChangeDeparture}
               />
 
-              <Flex justifyContent="space-between" alignItems="center" mb={1}>
-                <Text textStyle="heading3">Select Return Flight</Text>
-                <ViewToggleButton
-                  onClick={() => setBundleMode(bundleMode === 'bundled' ? 'separate' : 'bundled')}
-                >
-                  {bundleMode === 'bundled' ? 'View all flights' : 'View bundled deals'}
-                </ViewToggleButton>
-              </Flex>
+              <Text textStyle="heading3" mb={1}>
+                Select Return Flight
+              </Text>
               <Text textStyle="caption" color="text.light" mb={3}>
-                {bundleMode === 'bundled' ? 'Showing bundled deals' : 'Showing all flights'} to{' '}
-                {search.from.city} ({search.from.code}), {search.returnDate}
+                {search.to.city} ({search.to.code}) &rarr; {search.from.city} ({search.from.code}),{' '}
+                {search.returnDate}
               </Text>
 
               {GROUPS.map((group) => {
@@ -192,11 +181,7 @@ export default function ReturnListPage() {
                     <CollapsibleSection
                       key={group}
                       title={group}
-                      meta={
-                        bundleMode === 'bundled'
-                          ? `· ${flights.length} bundled with your departure`
-                          : `· ${flights.length} flights`
-                      }
+                      meta={`· ${flights.length} flights`}
                       info={
                         <InfoTooltip label="How bundled flights work">
                           <strong>Your return flight options are bundled with your outbound flight</strong>
@@ -204,8 +189,8 @@ export default function ReturnListPage() {
                             Priceline bundles outbound and return flights together when it unlocks a
                             lower price &mdash; sometimes on the same airline, sometimes not. If
                             you&rsquo;d rather pick your return flight and cabin class
-                            independently, you can browse all options, though the price may be
-                            higher.
+                            independently, choose from the other flights below, though the price
+                            may be higher.
                           </p>
                         </InfoTooltip>
                       }

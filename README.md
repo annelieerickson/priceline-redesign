@@ -9,7 +9,7 @@ A clickable prototype that reimagines Priceline's round-trip flight booking flow
 1. **Search** (`/`): enter airports, dates, and travelers. Once a search has been started, a "Pick up where you left off" card appears so you can resume at the furthest step reached.
 2. **Departure flights** (`/departure`): browse recommended and other flights with filters. Selecting a flight expands its fare options (Basic Economy through First) right inside the card.
 3. **Confirm details**: review the flight and fare in a popup before continuing.
-4. **Return flights** (`/return`): opens straight to bundled deals, with a summary of the chosen departure above the list. Recommended flights are bundled with the departure and grouped in a collapsible section (open by default); an info icon explains how bundling works. On bundled flights you can keep your current cabin class in one click or see other fare options.
+4. **Return flights** (`/return`): opens straight to the return flights, with a summary of the chosen departure above the list. Flights bundled with the departure are grouped in a collapsible "Bundled Flights" section (open by default) and priced as an add-on; an info icon explains how bundling works. Flights booked separately are listed below at full price. On bundled flights you can keep your current cabin class in one click or see other fare options.
 5. **Checkout** (`/checkout`): expandable flight details (including each leg and layover), seat and baggage information, and a summary of charges.
 
 Design decisions worth noting:

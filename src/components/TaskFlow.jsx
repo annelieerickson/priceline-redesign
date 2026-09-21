@@ -42,7 +42,7 @@ const STEPS = [
   {
     route: '/return',
     title: 'Review bundled return flights',
-    detail: 'Bundled flights are listed first in a collapsible section; hover the info icon to learn how bundling works. You can change views at any time.',
+    detail: 'Bundled flights are listed first in a collapsible section; hover the info icon to learn how bundling works. Flights booked separately are listed below.',
   },
   {
     route: '/return',
