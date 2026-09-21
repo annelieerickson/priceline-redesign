@@ -9,7 +9,6 @@ import FareOptions from '../components/FareOptions'
 import FareRail from '../components/FareRail'
 import PageContainer from '../components/PageContainer'
 import ConfirmDialog from '../components/ConfirmDialog'
-import BundleDialog from '../components/BundleDialog'
 import { departureFlights } from '../data/flights'
 import { featureFlags } from '../config/featureFlags'
 import { useBooking } from '../context/BookingContext'
@@ -26,7 +25,6 @@ export default function DepartureListPage() {
   const [faresOpen, setFaresOpen] = useState(false)
   const [selectedFare, setSelectedFare] = useState(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [bundleOpen, setBundleOpen] = useState(false)
 
   // Clicking the flight whose fares are already showing collapses them
   const handleSelectFlight = (flight) => {
@@ -50,15 +48,11 @@ export default function DepartureListPage() {
     setSelectedFare(null)
   }
 
+  // Returns open on bundled deals; the return page explains bundling in a tooltip
   const handleContinue = () => {
     setConfirmOpen(false)
     setDeparture({ flight: selectedFlight, fare: selectedFare })
-    setBundleOpen(true)
-  }
-
-  const goToReturn = (mode) => {
-    setBundleMode(mode)
-    setBundleOpen(false)
+    setBundleMode('bundled')
     navigate('/return')
   }
 
@@ -152,12 +146,6 @@ export default function DepartureListPage() {
         onContinue={handleContinue}
       />
 
-      <BundleDialog
-        open={bundleOpen}
-        onOpenChange={setBundleOpen}
-        onBrowseSeparately={() => goToReturn('separate')}
-        onShowBundled={() => goToReturn('bundled')}
-      />
     </Box>
   )
 }

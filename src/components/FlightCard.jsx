@@ -175,7 +175,7 @@ export default function FlightCard({
             <Text style={{ fontSize: 15, color: COLORS.textMuted }}>{priceLabel}</Text>
             <Text
               style={{
-                fontSize: compact ? 40 : 52,
+                fontSize: compact ? 34 : 44,
                 fontWeight: 600,
                 lineHeight: 1,
                 marginTop: 10,

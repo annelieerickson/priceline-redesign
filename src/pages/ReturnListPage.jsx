@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { Box, Flex, Text } from 'pcln-design-system'
 import Button from '../components/Button'
+import CollapsibleSection from '../components/CollapsibleSection'
 import DepartureSummary from '../components/DepartureSummary'
+import InfoTooltip from '../components/InfoTooltip'
 import TopNav from '../components/TopNav'
 import ProgressHeader from '../components/ProgressHeader'
 import FlightFilters from '../components/FlightFilters'
@@ -18,6 +20,8 @@ import { featureFlags } from '../config/featureFlags'
 import { useBooking } from '../context/BookingContext'
 
 const GROUPS = ['Recommended Flights to Chicago', 'Other Flights to Chicago']
+// The recommended group holds the flights that can be bundled with the departure
+const BUNDLED_GROUP = GROUPS[0]
 const showFareRail = featureFlags.fareOptionsView === 'rail'
 
 // Sized to sit beside the "Select Return Flight" heading
@@ -125,6 +129,29 @@ export default function ReturnListPage() {
     return null
   }
 
+  const renderFlightCards = (flights) =>
+    flights.map((flight) => {
+      const bundled = isBundleEligible(flight)
+      return (
+        <FlightCard
+          key={flight.id}
+          flight={flight}
+          selected={keepBarFlightId === flight.id || faresFlight?.id === flight.id}
+          onClick={() => handleSelectFlight(flight)}
+          priceMain={bundled ? `+$${flight.bundleDelta}` : `$${flight.separatePrice}`}
+          highlightPrice={isCheapest(flight)}
+          tags={[...(flight.tags ?? []), ...(isCheapest(flight) ? ['Cheapest Option'] : [])]}
+          bundleLabel={bundled ? 'Bundled Round-Trip' : null}
+          bundleNote={
+            bundled
+              ? `$${flight.bundleFromPrice.toLocaleString()} round-trip for ${search.travelers}`
+              : null
+          }
+          actionSlot={dropdownFor(flight)}
+        />
+      )
+    })
+
   return (
     <Box>
       <TopNav />
@@ -157,37 +184,43 @@ export default function ReturnListPage() {
               {GROUPS.map((group) => {
                 const flights = returnFlights.filter((f) => f.group === group)
                 if (!flights.length) return null
+
+                // Bundled flights sit in a collapsible section (open by default); the
+                // tooltip carries the explanation the old bundle popup used to show
+                if (group === BUNDLED_GROUP) {
+                  return (
+                    <CollapsibleSection
+                      key={group}
+                      title={group}
+                      meta={
+                        bundleMode === 'bundled'
+                          ? `· ${flights.length} bundled with your departure`
+                          : `· ${flights.length} flights`
+                      }
+                      info={
+                        <InfoTooltip label="How bundled flights work">
+                          <strong>Your return flight options are bundled with your outbound flight</strong>
+                          <p>
+                            Priceline bundles outbound and return flights together when it unlocks a
+                            lower price &mdash; sometimes on the same airline, sometimes not. If
+                            you&rsquo;d rather pick your return flight and cabin class
+                            independently, you can browse all options, though the price may be
+                            higher.
+                          </p>
+                        </InfoTooltip>
+                      }
+                    >
+                      {renderFlightCards(flights)}
+                    </CollapsibleSection>
+                  )
+                }
+
                 return (
                   <Box key={group} mb={4}>
                     <Text textStyle="paragraphBold" mb={2}>
                       {group}
                     </Text>
-                    {flights.map((flight) => {
-                      const bundled = isBundleEligible(flight)
-                      return (
-                        <FlightCard
-                          key={flight.id}
-                          flight={flight}
-                          selected={keepBarFlightId === flight.id || faresFlight?.id === flight.id}
-                          onClick={() => handleSelectFlight(flight)}
-                          priceMain={
-                            bundled ? `+$${flight.bundleDelta}` : `$${flight.separatePrice}`
-                          }
-                          highlightPrice={isCheapest(flight)}
-                          tags={[
-                            ...(flight.tags ?? []),
-                            ...(isCheapest(flight) ? ['Cheapest Option'] : []),
-                          ]}
-                          bundleLabel={bundled ? 'Bundled Round-Trip' : null}
-                          bundleNote={
-                            bundled
-                              ? `$${flight.bundleFromPrice.toLocaleString()} round-trip for ${search.travelers}`
-                              : null
-                          }
-                          actionSlot={dropdownFor(flight)}
-                        />
-                      )
-                    })}
+                    {renderFlightCards(flights)}
                   </Box>
                 )
               })}

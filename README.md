@@ -9,9 +9,8 @@ A clickable prototype that reimagines Priceline's round-trip flight booking flow
 1. **Search** (`/`): enter airports, dates, and travelers. Once a search has been started, a "Pick up where you left off" card appears so you can resume at the furthest step reached.
 2. **Departure flights** (`/departure`): browse recommended and other flights with filters. Selecting a flight expands its fare options (Basic Economy through First) right inside the card.
 3. **Confirm details**: review the flight and fare in a popup before continuing.
-4. **Bundle choice**: choose between bundled round-trip deals and browsing return flights separately.
-5. **Return flights** (`/return`): a summary of the chosen departure sits above the list. On bundled flights you can keep your current cabin class in one click or see other fare options.
-6. **Checkout** (`/checkout`): expandable flight details (including each leg and layover), seat and baggage information, and a summary of charges.
+4. **Return flights** (`/return`): opens straight to bundled deals, with a summary of the chosen departure above the list. Recommended flights are bundled with the departure and grouped in a collapsible section (open by default); an info icon explains how bundling works. On bundled flights you can keep your current cabin class in one click or see other fare options.
+5. **Checkout** (`/checkout`): expandable flight details (including each leg and layover), seat and baggage information, and a summary of charges.
 
 Design decisions worth noting:
 
@@ -37,20 +36,6 @@ Then open http://localhost:5173.
 | `npm run preview` | Serve the production build locally        |
 | `npm run lint`    | Check the code with Oxlint                |
 
-## Feature flags
-
-Alternate designs can be compared without code changes. Defaults live in `src/config/featureFlags.js`. To override a flag, add it to the URL; the choice is saved in the browser and carries through the whole flow. Use `=default` to clear it.
-
-| Flag              | Values                            | Default   | What it controls |
-| ----------------- | --------------------------------- | --------- | ---------------- |
-| `fareOptionsView` | `inline`, `rail`                  | `inline`  | Fare options expand inside the flight card (`inline`) or open in a panel along the right edge (`rail`). |
-| `uiScale`         | `compact`, `standard`             | `compact` | Flight cards, fare options, the Edit Search menu, the departure summary, and checkout content at 80% (`compact`) or full size (`standard`). Small text never drops below 12px on screen. |
-
-Examples:
-
-- http://localhost:5173/departure?fareOptionsView=rail
-- http://localhost:5173/departure?uiScale=standard
-- http://localhost:5173/departure?fareOptionsView=default&uiScale=default
 
 ## Data and images
 

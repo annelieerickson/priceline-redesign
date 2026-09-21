@@ -40,9 +40,9 @@ const STEPS = [
     detail: 'Review the flight, fare, and what the fare includes.',
   },
   {
-    route: '/departure',
-    title: 'Choose bundled or separate returns',
-    detail: 'Bundling can lower the total, browsing separately gives more choice. You can change views at any time.',
+    route: '/return',
+    title: 'Review bundled return flights',
+    detail: 'Bundled flights are listed first in a collapsible section; hover the info icon to learn how bundling works. You can change views at any time.',
   },
   {
     route: '/return',
