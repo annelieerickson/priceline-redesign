@@ -244,7 +244,7 @@ export default function TaskFlow() {
       {open && (
         <Panel ref={panelRef} role="dialog" aria-labelledby="task-flow-title" tabIndex={-1}>
           <Header>
-            <Title id="task-flow-title">Task flow</Title>
+            <Title id="task-flow-title">Task List</Title>
             <CloseButton type="button" aria-label="Hide task flow" onClick={() => toggle(false)}>
               <Close size={22} color="text.base" />
             </CloseButton>
