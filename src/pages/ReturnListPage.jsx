@@ -101,16 +101,17 @@ export default function ReturnListPage() {
 
   const currentStep = keepBarFlightId || faresFlight || confirmFlight ? 3 : 2
 
-  const dropdownFor = (flight) => {
-    if (keepBarFlightId === flight.id) {
-      return (
-        <KeepCabinBar
-          cabinName={departure.fare.name}
-          onKeep={() => handleKeepCabin(flight)}
-          onSeeOptions={() => handleSeeOtherOptions(flight)}
-        />
-      )
-    }
+  // The keep-cabin question hangs below the card's price column (FlightCard attachedSlot)
+  const keepBarFor = (flight) =>
+    keepBarFlightId === flight.id ? (
+      <KeepCabinBar
+        cabinName={departure.fare.name}
+        onKeep={() => handleKeepCabin(flight)}
+        onSeeOptions={() => handleSeeOtherOptions(flight)}
+      />
+    ) : null
+
+  const faresFor = (flight) => {
     if (!showFareRail && faresFlight?.id === flight.id) {
       return (
         <FareOptions
@@ -133,6 +134,8 @@ export default function ReturnListPage() {
           selected={keepBarFlightId === flight.id || faresFlight?.id === flight.id}
           onClick={() => handleSelectFlight(flight)}
           priceMain={bundled ? `+$${flight.bundleDelta}` : `$${flight.separatePrice}`}
+          // A bundled add-on price is for keeping the departure cabin, so name it
+          priceLabel={bundled ? departure.fare.name : 'Starting at'}
           highlightPrice={isCheapest(flight)}
           tags={[...(flight.tags ?? []), ...(isCheapest(flight) ? ['Cheapest Option'] : [])]}
           bundleLabel={bundled ? 'Bundled Round-Trip' : null}
@@ -141,7 +144,8 @@ export default function ReturnListPage() {
               ? `$${flight.bundleFromPrice.toLocaleString()} round-trip for ${search.travelers}`
               : null
           }
-          actionSlot={dropdownFor(flight)}
+          actionSlot={faresFor(flight)}
+          attachedSlot={keepBarFor(flight)}
         />
       )
     })
