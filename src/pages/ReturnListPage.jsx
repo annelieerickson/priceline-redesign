@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, Flex, Text } from 'pcln-design-system'
 import CollapsibleSection from '../components/CollapsibleSection'
@@ -13,7 +13,7 @@ import FareRail from '../components/FareRail'
 import PageContainer from '../components/PageContainer'
 import ConfirmDialog from '../components/ConfirmDialog'
 import KeepCabinBar from '../components/KeepCabinBar'
-import { returnFlights } from '../data/flights'
+import { getReturnFlights, returnFlights } from '../data/flights'
 import { featureFlags } from '../config/featureFlags'
 import { useBooking } from '../context/BookingContext'
 
@@ -23,7 +23,8 @@ const BUNDLED_GROUP = GROUPS[0]
 const showFareRail = featureFlags.fareOptionsView === 'rail'
 
 // Bundled flights are priced as an add-on to the departure and separate flights at
-// full price, so each section gets its own cheapest option
+// full price, so each section gets its own cheapest option. Prices are the same
+// whichever airline getReturnFlights() puts the bundled deals on.
 const cheapestBundleDelta = Math.min(
   ...returnFlights.filter((f) => f.bundledRoundTrip).map((f) => f.bundleDelta),
 )
@@ -44,6 +45,12 @@ export default function ReturnListPage() {
   const [confirmFlight, setConfirmFlight] = useState(null)
   const [confirmFare, setConfirmFare] = useState(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
+
+  // The cheapest bundled return is offered on the departure's airline
+  const flights = useMemo(
+    () => getReturnFlights(departure?.flight.airline),
+    [departure?.flight.airline],
+  )
 
   if (!departure) {
     navigate('/departure')
@@ -157,7 +164,7 @@ export default function ReturnListPage() {
       <Flex>
         <Box style={{ flex: 1, minWidth: 0 }}>
           <PageContainer py={4}>
-            <FlightFilters flights={returnFlights} airportKey="to" />
+            <FlightFilters flights={flights} airportKey="to" />
             {/* Capped to the wireframe's results width */}
             <Box style={{ flex: 1, minWidth: 0, maxWidth: 800 }}>
               <DepartureSummary
@@ -175,8 +182,8 @@ export default function ReturnListPage() {
               </Text>
 
               {GROUPS.map((group) => {
-                const flights = returnFlights.filter((f) => f.group === group)
-                if (!flights.length) return null
+                const groupFlights = flights.filter((f) => f.group === group)
+                if (!groupFlights.length) return null
 
                 // Bundled flights sit in a collapsible section (open by default); the
                 // tooltip carries the explanation the old bundle popup used to show
@@ -185,7 +192,7 @@ export default function ReturnListPage() {
                     <CollapsibleSection
                       key={group}
                       title={group}
-                      meta={`· ${flights.length} flights`}
+                      meta={`· ${groupFlights.length} flights`}
                       info={
                         <InfoTooltip label="How bundled flights work">
                           <strong>Your return flight options are bundled with your outbound flight</strong>
@@ -199,7 +206,7 @@ export default function ReturnListPage() {
                         </InfoTooltip>
                       }
                     >
-                      {renderFlightCards(flights)}
+                      {renderFlightCards(groupFlights)}
                     </CollapsibleSection>
                   )
                 }
@@ -209,7 +216,7 @@ export default function ReturnListPage() {
                     <Text textStyle="paragraphBold" mb={2}>
                       {group}
                     </Text>
-                    {renderFlightCards(flights)}
+                    {renderFlightCards(groupFlights)}
                   </Box>
                 )
               })}

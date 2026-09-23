@@ -361,6 +361,74 @@ export const returnFlights = [
   }),
 ]
 
+// Return itineraries by airline, used to put the cheapest bundled return on the
+// same airline as the chosen departure. One per airline in departureFlights.
+const returnItineraries = {
+  'United Airlines': {
+    airline: 'United Airlines',
+    segments: [leg('UA 1912', 'Boeing 737-700', SRQ, '1:25p', ORD, '3:22p', '2h 57m')],
+    duration: '2h 57m',
+  },
+  'American Airlines': {
+    airline: 'American Airlines',
+    segments: [leg('AA 589', 'Airbus A321', SRQ, '1:10p', ORD, '3:08p', '2h 58m')],
+    duration: '2h 58m',
+  },
+  'Delta Air Lines': {
+    airline: 'Delta Air Lines',
+    segments: [
+      leg('DL 1423', 'Airbus A321', SRQ, '12:05p', ATL, '1:29p', '1h 24m', '1h 01m'),
+      leg('DL 1423', 'Airbus A321', ATL, '2:30p', ORD, '3:35p', '2h 05m'),
+    ],
+    duration: '4h 30m',
+  },
+  'Southwest Airlines': {
+    airline: 'Southwest Airlines',
+    segments: [
+      leg('WN 2232', 'Boeing 737-800', SRQ, '11:45a', BNA, '12:20p', '1h 35m', '1h 05m'),
+      leg('WN 2232', 'Boeing 737-800', BNA, '1:25p', MDW, '3:00p', '1h 35m'),
+    ],
+    duration: '4h 15m',
+  },
+}
+
+// Rebuilds a flight on a different airline, keeping everything priced the same
+const withItinerary = (flight, itinerary) =>
+  makeFlight({
+    id: flight.id,
+    ...itinerary,
+    bundleDelta: flight.bundleDelta,
+    separatePrice: flight.separatePrice,
+    bundledRoundTrip: flight.bundledRoundTrip,
+    bundleFromPrice: flight.bundleFromPrice,
+    tags: flight.tags,
+    group: flight.group,
+  })
+
+const cheapestBundledReturn = returnFlights
+  .filter((f) => f.bundledRoundTrip)
+  .reduce((cheapest, f) => (f.bundleDelta < cheapest.bundleDelta ? f : cheapest))
+
+// The best bundled deal is offered on the airline the traveler already chose for
+// their departure, so only the airline and its itinerary change here: every
+// price, tag, and group stays exactly as listed above.
+export function getReturnFlights(departureAirline) {
+  const itinerary = returnItineraries[departureAirline]
+  if (!itinerary || itinerary.airline === cheapestBundledReturn.airline) return returnFlights
+
+  // The itinerary the cheapest flight gives up, handed to whichever bundled
+  // flight was already on the departure's airline so no two of them collide
+  const freedItinerary = returnItineraries[cheapestBundledReturn.airline]
+
+  return returnFlights.map((flight) => {
+    if (flight === cheapestBundledReturn) return withItinerary(flight, itinerary)
+    if (flight.bundledRoundTrip && flight.airline === itinerary.airline) {
+      return withItinerary(flight, freedItinerary)
+    }
+    return flight
+  })
+}
+
 export function findFlight(list, id) {
   return list.find((f) => f.id === id)
 }
